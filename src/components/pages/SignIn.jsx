@@ -1,6 +1,9 @@
 import {useState} from 'react'
 import {Link , useNavigate} from 'react-router-dom'
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { toast } from 'react-toastify';
 import {ReactComponent as ArrowToRightIcon} from '../../assets/svg/keyboardArrowRightIcon.svg'
+import OAuth from './OAuth';
 import visibilityIcon from '../../assets/svg/visibilityIcon.svg'
 
 function SignIn() {
@@ -11,15 +14,32 @@ function SignIn() {
     password:''
   })
 
-  const onChange = (e , prevState) => {
+  const onChange = (e) => {
     setformData({
-      ...prevState,
+      ...formData,
       [e.target.id] : e.target.value
     })
   }
 
   const {email , password} = formData 
   const navigate = useNavigate()
+
+  const onSubmit = async (e) => {
+    console.log(email + password)
+    e.preventDefault()
+    try{
+      const auth = getAuth()
+
+    const userCredential = await signInWithEmailAndPassword(auth , email , password)
+    if(userCredential){
+      navigate('/profile')
+    }
+    }
+    catch(error){
+      toast.error('bad user credential')
+    }
+
+  }
 
     return (
       <>
@@ -28,13 +48,13 @@ function SignIn() {
             <p className="pageHeader">Welcome Back</p>
           </header>
           <main>
-            <form> 
+            <form onSubmit={onSubmit}> 
               <input 
                 type="email"
                 className='emailInput'
                 placeholder='Email'
                 id='email'
-                value={email}
+                defaultValue={email || ""}
                 onChange={onChange}
               />
 
@@ -44,7 +64,7 @@ function SignIn() {
                   className='passwordInput'
                   placeholder='password' 
                   id='password'
-                  value={password}
+                  defaultValue={password || ""}
                   onChange={onChange}
                 />
                 <img 
@@ -66,7 +86,7 @@ function SignIn() {
                 </button>
               </div>
             </form>
-
+            <OAuth />
             <Link to='/sign-up' className='registerLink'>Sign Up Instead</Link>
 
           </main>

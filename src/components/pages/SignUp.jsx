@@ -2,7 +2,10 @@ import {useState} from 'react'
 import {Link , useNavigate} from 'react-router-dom'
 import {getAuth , createUserWithEmailAndPassword , updateProfile} from 'firebase/auth'
 import {db} from '../../firebase.config'
+import {setDoc , doc , serverTimestamp} from 'firebase/firestore'
+import { toast } from 'react-toastify'
 import {ReactComponent as ArrowToRightIcon} from '../../assets/svg/keyboardArrowRightIcon.svg'
+import OAuth from './OAuth'
 import visibilityIcon from '../../assets/svg/visibilityIcon.svg'
 
 function SignUp() {
@@ -19,26 +22,34 @@ function SignUp() {
 
   const onChange = (e , prevState) => {
     setformData({
+      ...formData ,
       [e.target.id] : e.target.value
     })
   }
 
   const onSubmit = async (e) => {
     e.preventDefault()
-
+    console.log(name + password + email)
     try{
       const auth = getAuth()
       const userCredential = await createUserWithEmailAndPassword(auth , email , password)
       const user = userCredential.user
 
-    /*  updateProfile(auth.currentUser , {
+      updateProfile(auth.currentUser , {
         displayName: name
-      })*/
+      })
+
+      const formDataCopy = {...formData}
+      delete formDataCopy.password
+      formDataCopy.timeStamp = serverTimestamp()
+
+      await setDoc(doc(db , 'users' , user.uid) , formDataCopy)
+
+
       navigate('/') 
-      
     }
     catch(error){
-      console.log(error)
+      toast.error('something went wrong with registeration')
     }
   }
 
@@ -57,7 +68,7 @@ function SignUp() {
                 className='nameInput'
                 placeholder='Name'
                 id='name'
-                value={name}
+                defaultValue={name || ""}
                 onChange={onChange}
               />
               <input 
@@ -65,7 +76,7 @@ function SignUp() {
                 className='emailInput'
                 placeholder='Email'
                 id='email'
-                value={email}
+                defaultValue={email || " "}
                 onChange={onChange}
               />
 
@@ -75,7 +86,7 @@ function SignUp() {
                   className='passwordInput'
                   placeholder='password' 
                   id='password'
-                  value={password}
+                  defaultValue={password || ""}
                   onChange={onChange}
                 />
                 <img 
@@ -98,7 +109,7 @@ function SignUp() {
               </div>
 
             </form>
-
+            <OAuth />
             <Link to='/sign-in' className='registerLink'>Sign in Instead</Link>
 
           </main>
