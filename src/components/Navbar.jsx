@@ -11,6 +11,8 @@ function Navbar() {
         if(route === window.location.pathname)return (true)
     }
 
+
+
   return (
     <footer className='navbar'>
         <nav className='navbarNav'>
