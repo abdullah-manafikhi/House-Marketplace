@@ -11,7 +11,7 @@ function Navbar() {
         if(route === window.location.pathname)return (true)
     }
 
-
+// asdf
 
   return (
     <footer className='navbar'>
